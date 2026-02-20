@@ -1,0 +1,97 @@
+// @vitest-environment jsdom
+
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { describe, expect, test } from "vitest";
+import { MockedProvider } from "@apollo/client/testing/react";
+import {
+  ADD_MESSAGE,
+  GET_DASHBOARD_DATA,
+  GraphqlDemo,
+} from "./graphql-playground";
+
+describe("GraphqlDemo", () => {
+  test("renders greeting and messages from query", async () => {
+    const mocks = [
+      {
+        request: {
+          query: GET_DASHBOARD_DATA,
+        },
+        result: {
+          data: {
+            hello: "Hello test!",
+            messages: ["First message"],
+          },
+        },
+      },
+    ];
+
+    render(
+      <MockedProvider mocks={mocks}>
+        <GraphqlDemo />
+      </MockedProvider>,
+    );
+
+    expect(screen.getByText("Loading query...")).toBeInTheDocument();
+
+    expect(await screen.findByText("Hello test!")).toBeInTheDocument();
+    expect(screen.getByText("First message")).toBeInTheDocument();
+  });
+
+  test("runs add message mutation and shows updated list", async () => {
+    const inputValue = "Client mutation message";
+
+    const mocks = [
+      {
+        request: {
+          query: GET_DASHBOARD_DATA,
+        },
+        result: {
+          data: {
+            hello: "Hello test!",
+            messages: ["Existing"],
+          },
+        },
+      },
+      {
+        request: {
+          query: ADD_MESSAGE,
+          variables: { message: inputValue },
+        },
+        result: {
+          data: {
+            addMessage: ["Existing", inputValue],
+          },
+        },
+      },
+      {
+        request: {
+          query: GET_DASHBOARD_DATA,
+        },
+        result: {
+          data: {
+            hello: "Hello test!",
+            messages: ["Existing", inputValue],
+          },
+        },
+      },
+    ];
+
+    render(
+      <MockedProvider mocks={mocks}>
+        <GraphqlDemo />
+      </MockedProvider>,
+    );
+
+    await screen.findByText("Existing");
+
+    fireEvent.change(screen.getByLabelText("Add message"), {
+      target: { value: inputValue },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Run mutation" }));
+
+    await waitFor(() => {
+      expect(screen.getByText(inputValue)).toBeInTheDocument();
+    });
+  });
+});
