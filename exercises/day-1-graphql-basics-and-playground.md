@@ -1,4 +1,4 @@
-# Day 1 (2 hours): GraphQL Basics + Read Queries
+# Day 1 (2 hours): GraphQL Basics + Read Queries ✅
 
 ## Outcome
 

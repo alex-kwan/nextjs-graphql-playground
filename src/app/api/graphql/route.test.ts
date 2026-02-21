@@ -34,6 +34,16 @@ describe("GraphQL route", () => {
     expect(data.hello).toBe("Hello from Next.js GraphQL server!");
   });
 
+  test("returns server time", async () => {
+    const data = await executeGraphql<{ serverTime: string }>(`
+      query {
+        serverTime
+      }
+    `);
+
+    expect(new Date(data.serverTime).getTime()).toBeLessThanOrEqual(Date.now());
+  });
+
   test("adds message through mutation", async () => {
     const newMessage = `test-message-${Date.now()}`;
 

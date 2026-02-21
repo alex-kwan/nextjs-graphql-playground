@@ -20,6 +20,7 @@ describe("GraphqlDemo", () => {
           data: {
             hello: "Hello test!",
             messages: ["First message"],
+            serverTime: "2026-02-21T05:25:51.000Z",
           },
         },
       },
@@ -32,9 +33,9 @@ describe("GraphqlDemo", () => {
     );
 
     expect(screen.getByText("Loading query...")).toBeInTheDocument();
-
     expect(await screen.findByText("Hello test!")).toBeInTheDocument();
     expect(screen.getByText("First message")).toBeInTheDocument();
+    expect(screen.getByText(`Server Time : 2026-02-21T05:25:51.000Z`)).toBeInTheDocument();
   });
 
   test("runs add message mutation and shows updated list", async () => {
@@ -49,6 +50,7 @@ describe("GraphqlDemo", () => {
           data: {
             hello: "Hello test!",
             messages: ["Existing"],
+            serverTime: "2026-02-21T05:25:51.000Z",
           },
         },
       },
@@ -71,6 +73,7 @@ describe("GraphqlDemo", () => {
           data: {
             hello: "Hello test!",
             messages: ["Existing", inputValue],
+            serverTime: new Date().toISOString(),
           },
         },
       },

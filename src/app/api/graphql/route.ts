@@ -7,6 +7,7 @@ const typeDefs = /* GraphQL */ `
   type Query {
     hello: String!
     messages: [String!]!
+    serverTime: String!
   }
 
   type Mutation {
@@ -18,6 +19,7 @@ const resolvers = {
   Query: {
     hello: () => "Hello from Next.js GraphQL server!",
     messages: () => messages,
+    serverTime: () => new Date().toISOString(),
   },
   Mutation: {
     addMessage: (_: unknown, { message }: { message: string }) => {

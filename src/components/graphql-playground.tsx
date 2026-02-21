@@ -10,6 +10,7 @@ export const GET_DASHBOARD_DATA = gql`
   query DashboardData {
     hello
     messages
+    serverTime
   }
 `;
 
@@ -22,6 +23,7 @@ export const ADD_MESSAGE = gql`
 type DashboardDataQuery = {
   hello: string;
   messages: string[];
+  serverTime: string;
 };
 
 type AddMessageMutation = {
@@ -62,6 +64,9 @@ export function GraphqlDemo() {
       <h1 className={styles.title}>Next.js + GraphQL Playground</h1>
       <p className={styles.subtitle}>
         Query and mutate data from the GraphQL API at <code>/api/graphql</code>.
+      </p>
+      <p className={styles.subtitle}>
+        Server Time : {data?.serverTime}
       </p>
 
       <section className={styles.card}>
