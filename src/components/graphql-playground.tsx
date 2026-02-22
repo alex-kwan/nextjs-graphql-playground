@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { gql } from "@apollo/client";
+import { CombinedGraphQLErrors, gql } from "@apollo/client";
 import { ApolloProvider, useMutation, useQuery } from "@apollo/client/react";
 import { getApolloClient } from "@/lib/apollo-client";
 import styles from "@/app/page.module.css";
@@ -39,25 +39,25 @@ export function GraphqlDemo() {
   const { data, loading, error } = useQuery<DashboardDataQuery>(
     GET_DASHBOARD_DATA,
   );
-  const [addMessage, { loading: isAdding, error: addError }] =
+  const [addMessage, { loading: isAdding, error: addError}] =
     useMutation<AddMessageMutation, AddMessageVariables>(ADD_MESSAGE, {
+      errorPolicy: "all",
       refetchQueries: [{ query: GET_DASHBOARD_DATA }],
     });
+
+  const graphqlErrors = CombinedGraphQLErrors.is(addError) ? addError.errors : [];
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextValue = message.trim();
-
-    if (!nextValue) {
-      return;
-    }
-
+  
     await addMessage({
       variables: { message: nextValue },
     });
-
+   
     setMessage("");
   }
+
 
   return (
     <main className={styles.main}>
@@ -86,6 +86,11 @@ export function GraphqlDemo() {
           ))}
         </ul>
       </section>
+      {graphqlErrors != null && graphqlErrors.length > 0 && (
+      <p id="errorSpot" className={styles.error}>
+        {(graphqlErrors[0].extensions?.fields as { message: string } | undefined)?.message}
+      </p>
+    )}
 
       <form className={styles.form} onSubmit={onSubmit}>
         <label htmlFor="message">Add message</label>
@@ -100,8 +105,6 @@ export function GraphqlDemo() {
           {isAdding ? "Saving..." : "Run mutation"}
         </button>
       </form>
-
-      {addError && <p className={styles.error}>{addError.message}</p>}
     </main>
   );
 }

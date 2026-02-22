@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { POST } from "./route";
+import { GraphQLError, GraphQLErrorExtensions } from "graphql";
 
 type GraphqlResponse<TData> = {
   data?: TData;
@@ -17,7 +18,7 @@ async function executeGraphql<TData>(query: string, variables?: Record<string, u
   const payload = (await response.json()) as GraphqlResponse<TData>;
 
   if (payload.errors?.length) {
-    throw new Error(payload.errors.map((error) => error.message).join("; "));
+    throw payload.errors[0]; // Throws the first error, which includes extensions
   }
 
   return payload.data as TData;
@@ -66,4 +67,42 @@ describe("GraphQL route", () => {
 
     expect(queryData.messages).toContain(newMessage);
   });
+
+  test("attempt to add invalid message through mutation", async () => {
+    const newMessage = ``;
+
+    try {
+      const mutationData = await executeGraphql<{ addMessage: string[] }>(
+      `
+        mutation AddMessage($message: String!) {
+          addMessage(message: $message)
+        }
+      `,
+      { message: newMessage },
+    );
+    }
+    catch (error) {
+      const extensions = (error as GraphQLError).extensions as GraphQLErrorExtensions;
+      expect(extensions.code).toBe("BAD_USER_INPUT");
+      }
+    
+const longMessage = `This is a very long message that exceeds the 200 character limit set by the GraphQL server. It should trigger a validation error when we attempt to add it through the mutation. The purpose of this test is to ensure that our server correctly handles input that violates our defined constraints and returns the appropriate error response to the client.`;
+
+    try {
+      const mutationData = await executeGraphql<{ addMessage: string[] }>(
+      `
+        mutation AddMessage($message: String!) {
+          addMessage(message: $message)
+        }
+      `,
+      { message: longMessage },
+    );
+    }
+    catch (error) {
+      const extensions = (error as GraphQLError).extensions as GraphQLErrorExtensions;
+      expect(extensions.code).toBe("BAD_USER_INPUT");
+      }
+  });
 });
+
+

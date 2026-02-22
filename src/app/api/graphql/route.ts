@@ -1,4 +1,5 @@
 import { createSchema, createYoga } from "graphql-yoga";
+import { GraphQLError } from "graphql/error";
 import { NextRequest } from "next/server";
 
 const messages: string[] = ["GraphQL is connected."];
@@ -23,7 +24,30 @@ const resolvers = {
   },
   Mutation: {
     addMessage: (_: unknown, { message }: { message: string }) => {
-      messages.push(message);
+      
+      const trimmed = message.trim();
+      if (trimmed.length <= 0) {
+        throw new GraphQLError("Validation failed", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            fields: {
+              message: "Message cannot be empty.",
+            }
+          }
+        })
+      }
+
+      if (trimmed.length > 200) {
+        throw new GraphQLError("Validation failed", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            fields: {
+              message: "Message cannot exceed 200 characters.",
+            }
+          }
+        })
+      }
+      messages.push(trimmed);
       return messages;
     },
   },
@@ -36,6 +60,7 @@ const { handleRequest } = createYoga({
     resolvers,
   }),
   fetchAPI: { Response },
+  maskedErrors: false,
 });
 
 export const runtime = "nodejs";

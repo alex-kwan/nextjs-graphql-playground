@@ -97,4 +97,71 @@ describe("GraphqlDemo", () => {
       expect(screen.getByText(inputValue)).toBeInTheDocument();
     });
   });
+
+  test("try to add an empty message", async () => {
+    const inputValue = "";
+
+    const mocks = [
+      {
+        request: {
+          query: GET_DASHBOARD_DATA,
+        },
+        result: {
+          data: {
+            hello: "Hello test!",
+            messages: [""],
+            serverTime: "2026-02-21T05:25:51.000Z",
+          },
+        },
+      },
+      {
+        request: {
+          query: ADD_MESSAGE,
+          variables: { message: inputValue },
+        },
+        result: {
+          error: {
+            message: "Validation failed",
+            extensions: {
+              code: "BAD_USER_INPUT",
+              fields: {
+                message: "Message cannot be empty.",
+              },
+            },
+          }
+        },
+      },
+      {
+        request: {
+          query: GET_DASHBOARD_DATA,
+        },
+        result: {
+          data: {
+            hello: "Hello test!",
+            messages: [],
+            serverTime: new Date().toISOString(),
+          },
+        },
+      },
+    ];
+
+    render(
+      <MockedProvider mocks={mocks}>
+        <GraphqlDemo />
+      </MockedProvider>,
+    );
+
+    await screen.findByText("Hello test!");
+
+    fireEvent.change(screen.getByLabelText("Add message"), {
+      target: { value: "" },
+    });
+    expect(screen.getByLabelText("Add message")).toHaveValue("");
+    fireEvent.click(screen.getByRole("button", { name: "Run mutation" }));
+    expect(screen.getByLabelText("Add message")).toHaveValue("");
+
+   await waitFor(() => {
+      expect(screen.getByText("No messages yet.")).toBeInTheDocument();
+    });
+  });
 });
