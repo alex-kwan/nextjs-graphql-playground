@@ -1,6 +1,7 @@
 import { createSchema, createYoga } from "graphql-yoga";
-import { GraphQLError } from "graphql/error";
 import { NextRequest } from "next/server";
+import queryResolvers from "./queries";
+import mutationResolvers from "./mutations";
 
 const messages: string[] = [];
 
@@ -16,42 +17,7 @@ const typeDefs = /* GraphQL */ `
   }
 `;
 
-const resolvers = {
-  Query: {
-    hello: () => "Hello from Next.js GraphQL server!",
-    messages: () => messages,
-    serverTime: () => new Date().toISOString(),
-  },
-  Mutation: {
-    addMessage: (_: unknown, { message }: { message: string }) => {
-      
-      const trimmed = message.trim();
-      if (trimmed.length <= 0) {
-        throw new GraphQLError("Validation failed", {
-          extensions: {
-            code: "BAD_USER_INPUT",
-            fields: {
-              message: "Message cannot be empty.",
-            }
-          }
-        })
-      }
-
-      if (trimmed.length > 200) {
-        throw new GraphQLError("Validation failed", {
-          extensions: {
-            code: "BAD_USER_INPUT",
-            fields: {
-              message: "Message cannot exceed 200 characters.",
-            }
-          }
-        })
-      }
-      messages.push(trimmed);
-      return messages;
-    },
-  },
-};
+const resolvers = {Query: queryResolvers(messages), Mutation: mutationResolvers(messages)};
 
 const { handleRequest } = createYoga({
   graphqlEndpoint: "/api/graphql",

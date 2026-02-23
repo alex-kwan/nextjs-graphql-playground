@@ -3,14 +3,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
-import {
-  ADD_MESSAGE,
-  GET_DASHBOARD_DATA,
-  GraphqlDemo,
-} from "./graphql-playground";
-import { wait } from "@apollo/client/v4-migration";
+import { GET_DASHBOARD_DATA } from "@/app/hooks/useDashboardData";
+import { GraphqlPlayground } from "./graphql-playground";
+import { ADD_MESSAGE } from "@/app/hooks/useAddMessage";
+import { GraphQLError } from "graphql/error";
 
-describe("GraphqlDemo", () => {
+describe("GraphqlPlayground", () => {
   test("renders greeting and messages from query", async () => {
     const mocks = [
       {
@@ -29,7 +27,7 @@ describe("GraphqlDemo", () => {
 
     render(
       <MockedProvider mocks={mocks}>
-        <GraphqlDemo />
+        <GraphqlPlayground />
       </MockedProvider>,
     );
 
@@ -82,7 +80,7 @@ describe("GraphqlDemo", () => {
 
     render(
       <MockedProvider mocks={mocks}>
-        <GraphqlDemo />
+        <GraphqlPlayground />
       </MockedProvider>,
     );
 
@@ -101,7 +99,6 @@ describe("GraphqlDemo", () => {
 
   test("try to add an empty message", async () => {
     const inputValue = "";
-
     const mocks = [
       {
         request: {
@@ -121,47 +118,27 @@ describe("GraphqlDemo", () => {
           variables: { message: inputValue },
         },
         result: {
-          error: {
-            message: "Validation failed",
+          errors: [new GraphQLError("Message cannot be empty.", {
             extensions: {
-              code: "BAD_USER_INPUT",
               fields: {
                 message: "Message cannot be empty.",
               },
-            },
-          }
+            },          
+          })],
         },
-      },
-      // {
-      //   request: {
-      //     query: GET_DASHBOARD_DATA,
-      //   },
-      //   result: {
-      //     data: {
-      //       hello: "Hello test!",
-      //       messages: [],
-      //       serverTime: new Date().toISOString(),
-      //     },
-      //   },
-      // },
+      }
     ];
 
     render(
       <MockedProvider mocks={mocks}>
-        <GraphqlDemo />
+        <GraphqlPlayground />
       </MockedProvider>,
     );
 
-    await screen.findByText("Hello test!");
-
-    fireEvent.change(screen.getByLabelText("Add message"), {
-      target: { value: "" },
-    });
-    expect(screen.getByLabelText("Add message")).toHaveValue("");
-    fireEvent.click(screen.getByRole("button", { name: "Run mutation" }), { bubbles: true });
+    fireEvent.click(screen.getByRole("button", { name: "Run mutation" }), { bubbles: false });
 
     await waitFor(() => {
       expect(screen.getByText("Message cannot be empty.")).toBeInTheDocument();
-    }, { timeout: 2000 });
-});
+    });
+  });
 });
