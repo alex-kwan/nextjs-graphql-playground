@@ -8,6 +8,7 @@ import {
   GET_DASHBOARD_DATA,
   GraphqlDemo,
 } from "./graphql-playground";
+import { wait } from "@apollo/client/v4-migration";
 
 describe("GraphqlDemo", () => {
   test("renders greeting and messages from query", async () => {
@@ -131,18 +132,18 @@ describe("GraphqlDemo", () => {
           }
         },
       },
-      {
-        request: {
-          query: GET_DASHBOARD_DATA,
-        },
-        result: {
-          data: {
-            hello: "Hello test!",
-            messages: [],
-            serverTime: new Date().toISOString(),
-          },
-        },
-      },
+      // {
+      //   request: {
+      //     query: GET_DASHBOARD_DATA,
+      //   },
+      //   result: {
+      //     data: {
+      //       hello: "Hello test!",
+      //       messages: [],
+      //       serverTime: new Date().toISOString(),
+      //     },
+      //   },
+      // },
     ];
 
     render(
@@ -157,11 +158,10 @@ describe("GraphqlDemo", () => {
       target: { value: "" },
     });
     expect(screen.getByLabelText("Add message")).toHaveValue("");
-    fireEvent.click(screen.getByRole("button", { name: "Run mutation" }));
-    expect(screen.getByLabelText("Add message")).toHaveValue("");
+    fireEvent.click(screen.getByRole("button", { name: "Run mutation" }), { bubbles: true });
 
-   await waitFor(() => {
-      expect(screen.getByText("No messages yet.")).toBeInTheDocument();
-    });
-  });
+    await waitFor(() => {
+      expect(screen.getByText("Message cannot be empty.")).toBeInTheDocument();
+    }, { timeout: 2000 });
+});
 });

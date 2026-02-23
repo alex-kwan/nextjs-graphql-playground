@@ -86,11 +86,10 @@ export function GraphqlDemo() {
           ))}
         </ul>
       </section>
-      {graphqlErrors != null && graphqlErrors.length > 0 && (
-      <p id="errorSpot" className={styles.error}>
-        {(graphqlErrors[0].extensions?.fields as { message: string } | undefined)?.message}
+      
+      <p data-testid="errorSpot" className={styles.error}>
+        {graphqlErrors != null && graphqlErrors.length > 0 && ((graphqlErrors[0].extensions?.fields as { message: string } | undefined)?.message)}
       </p>
-    )}
 
       <form className={styles.form} onSubmit={onSubmit}>
         <label htmlFor="message">Add message</label>

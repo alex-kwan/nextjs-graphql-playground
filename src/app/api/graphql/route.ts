@@ -2,7 +2,7 @@ import { createSchema, createYoga } from "graphql-yoga";
 import { GraphQLError } from "graphql/error";
 import { NextRequest } from "next/server";
 
-const messages: string[] = ["GraphQL is connected."];
+const messages: string[] = [];
 
 const typeDefs = /* GraphQL */ `
   type Query {
