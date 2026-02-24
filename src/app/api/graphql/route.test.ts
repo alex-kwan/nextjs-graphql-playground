@@ -68,6 +68,30 @@ describe("GraphQL route", () => {
     expect(queryData.messages).toContain(newMessage);
   });
 
+  // test("adds messageV2 through mutation", async () => {
+  //   const newMessage = `test-message-${Date.now()}`;
+
+  //   const mutationData = await executeGraphql<{ addMessageV2: string[] }>(
+  //     `
+  //       mutation AddMessageV2($message: String!) {
+  //         addMessageV2(message: $message)
+  //       }
+  //     `,
+  //     { message: newMessage },
+  //   );
+
+  //   expect(mutationData.addMessageV2).toContain(newMessage);
+
+  //   const queryData = await executeGraphql<{ messagesV2: string[] }>(`
+  //     query {
+  //       messagesV2
+  //     }
+  //   `);
+
+  //   expect(queryData.messagesV2).toContain(newMessage);
+  // });
+
+
   test("attempt to add invalid message through mutation", async () => {
     const newMessage = ``;
 

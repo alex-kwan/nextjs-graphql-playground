@@ -1,3 +1,4 @@
+import { Message } from "@/app/api/graphql/types";
 import styles from "@/app/page.module.css";
 import { CombinedGraphQLErrors, ErrorLike } from "@apollo/client";
 
@@ -7,6 +8,7 @@ export type GraphqlPlaygroundViewProps = {
   dashboardError: ErrorLike | undefined,
   hello: string,
   messages: string[],
+  messagesV2: Message[],
   addError: ErrorLike | undefined,
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>,
   message: string,
@@ -18,6 +20,7 @@ export function GraphqlPlaygroundView(props: GraphqlPlaygroundViewProps) {
 
 const graphqlErrors = CombinedGraphQLErrors.is(props.addError) ? props.addError.errors : [];
 
+  let combinedMessages = [...props.messages, ...props.messagesV2.map((message) => message.text)];
   return <main className={styles.main}>
       <h1 className={styles.title}>Next.js + GraphQL Playground</h1>
       <p className={styles.subtitle}>
@@ -37,9 +40,9 @@ const graphqlErrors = CombinedGraphQLErrors.is(props.addError) ? props.addError.
       <section className={styles.card}>
         <h2>Messages</h2>
         {props.loading && <p>Loading messages...</p>}
-        {!props.loading && props.messages.length === 0 && <p>No messages yet.</p>}
+        {!props.loading && combinedMessages.length === 0 && <p>No messages yet.</p>}
         <ul className={styles.messages}>
-          {props.messages.map((entry: string, index: number) => (
+          {combinedMessages.map((entry: string, index: number) => (
             <li key={`${entry}-${index}`}>{entry}</li>
           ))}
         </ul>

@@ -20,6 +20,7 @@ describe("GraphqlPlayground", () => {
             hello: "Hello test!",
             messages: ["First message"],
             serverTime: "2026-02-21T05:25:51.000Z",
+            messagesV2: [],
           },
         },
       },
@@ -49,6 +50,7 @@ describe("GraphqlPlayground", () => {
           data: {
             hello: "Hello test!",
             messages: ["Existing"],
+            messagesV2: [],
             serverTime: "2026-02-21T05:25:51.000Z",
           },
         },
@@ -73,6 +75,7 @@ describe("GraphqlPlayground", () => {
             hello: "Hello test!",
             messages: ["Existing", inputValue],
             serverTime: new Date().toISOString(),
+            messagesV2: [],
           },
         },
       },
@@ -108,6 +111,7 @@ describe("GraphqlPlayground", () => {
           data: {
             hello: "Hello test!",
             messages: [""],
+            messagesV2: [],
             serverTime: "2026-02-21T05:25:51.000Z",
           },
         },
@@ -134,6 +138,10 @@ describe("GraphqlPlayground", () => {
         <GraphqlPlayground />
       </MockedProvider>,
     );
+
+    fireEvent.change(screen.getByLabelText("Add message"), {
+      target: { value: inputValue },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Run mutation" }), { bubbles: false });
 
